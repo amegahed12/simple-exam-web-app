@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Exam Web App - Exam</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="exam-header">
+            <h1>Exam</h1>
+            <div class="timer" id="timer">Time Remaining: 60:00</div>
+            <button class="btn btn-danger" onclick="handleLogout()">Logout</button>
+        </header>
+
+        <div class="exam-container">
+            <!-- Question Navigation Panel -->
+            <div class="question-nav">
+                <h3>Question Navigation</h3>
+                <div class="nav-buttons" id="questionNav">
+                    <!-- Question buttons will be added here dynamically -->
+                </div>
+                <div class="nav-legend">
+                    <div class="legend-item">
+                        <span class="legend-color answered"></span>
+                        <span>Answered</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color marked"></span>
+                        <span>Marked</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color current"></span>
+                        <span>Current</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Question Area -->
+            <div class="question-area">
+                <div class="question-container" id="questionContainer">
+                    <!-- Question content will be added here dynamically -->
+                </div>
+
+                <div class="question-actions">
+                    <button class="btn btn-secondary" onclick="previousQuestion()" id="prevBtn">Previous</button>
+                    <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn">Next</button>
+                    <button class="btn btn-warning" onclick="markQuestion()" id="markBtn">Mark for Review</button>
+                    <button class="btn btn-success" onclick="submitExam()" id="submitBtn">Submit Exam</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/exam.js"></script>
+</body>
+</html>

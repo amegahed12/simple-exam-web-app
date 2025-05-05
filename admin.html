@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Exam Web App - Admin Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="admin-header">
+            <h1>Admin Dashboard</h1>
+            <button class="btn btn-danger" onclick="handleLogout()">Logout</button>
+        </header>
+
+        <div class="admin-container">
+            <!-- Exam Settings -->
+            <section class="exam-settings">
+                <h2>Exam Settings</h2>
+                <div class="form-group">
+                    <label for="examDuration">Exam Duration (minutes)</label>
+                    <div class="time-input">
+                        <input type="number" id="examDuration" min="1" value="60">
+                        <button class="btn btn-primary" onclick="saveExamSettings()">Save Settings</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Question Management -->
+            <section class="admin-section">
+                <h2>Question Management</h2>
+                <div class="question-list" id="questionList">
+                    <!-- Questions will be listed here -->
+                </div>
+                <button class="btn btn-primary" onclick="showAddQuestionForm()">Add New Question</button>
+            </section>
+
+            <!-- User Results -->
+            <section class="admin-section">
+                <h2>User Results</h2>
+                <div class="user-list" id="userList">
+                    <!-- User results will be listed here -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Add/Edit Question Modal -->
+        <div class="modal hidden" id="questionModal">
+            <div class="modal-content">
+                <h3 id="modalTitle">Add New Question</h3>
+                <form id="questionForm" onsubmit="return handleQuestionSubmit(event)">
+                    <div class="form-group">
+                        <label for="questionType">Question Type</label>
+                        <select id="questionType" onchange="updateQuestionForm()" required>
+                            <option value="mcq">Multiple Choice</option>
+                            <option value="true_false">True/False</option>
+                            <option value="written">Written Answer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="questionText">Question Text</label>
+                        <textarea id="questionText" required></textarea>
+                    </div>
+                    <div id="optionsContainer">
+                        <!-- Options will be added here based on question type -->
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeQuestionModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Question</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
