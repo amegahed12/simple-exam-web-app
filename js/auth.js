@@ -3,42 +3,47 @@ function toggleForms() {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
     
+    // Toggle the 'hidden' class to show/hide forms
     loginForm.classList.toggle('hidden');
     registerForm.classList.toggle('hidden');
 }
 
 // Handle login form submission
 function handleLogin(event) {
-    event.preventDefault();
+    event.preventDefault(); // Prevent default form submission
     
+    // Get username and password from input fields
     const username = document.getElementById('loginUsername').value;
     const password = document.getElementById('loginPassword').value;
     
     console.log('Attempting login for:', username);
     
+    // Retrieve user data from storage
     const user = getUser(username);
     console.log('Retrieved user:', user);
     
+    // Check if user exists
     if (!user) {
         alert('User not found');
         return false;
     }
     
+    // Check if password matches
     if (user.password !== password) {
         alert('Invalid password');
         return false;
     }
     
-    // Set current user and redirect
+    // Set current user and redirect to appropriate dashboard
     setCurrentUser(username);
     console.log('Current user set to:', username);
     
     // Add a small delay before redirecting to ensure storage is updated
     setTimeout(() => {
         if (user.isAdmin) {
-            window.location.href = 'admin.html';
+            window.location.href = 'admin.html'; // Redirect admin
         } else {
-            window.location.href = 'exam.html';
+            window.location.href = 'exam.html'; // Redirect regular user
         }
     }, 100);
     
@@ -47,20 +52,22 @@ function handleLogin(event) {
 
 // Handle registration form submission
 function handleRegistration(event) {
-    event.preventDefault();
+    event.preventDefault(); // Prevent default form submission
     
+    // Get registration form values
     const username = document.getElementById('registerUsername').value;
     const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     
     console.log('Attempting registration for:', username);
     
-    // Validate input
+    // Validate input: passwords must match
     if (password !== confirmPassword) {
         alert('Passwords do not match');
         return false;
     }
     
+    // Validate input: password length
     if (password.length < 6) {
         alert('Password must be at least 6 characters long');
         return false;
@@ -72,7 +79,7 @@ function handleRegistration(event) {
         return false;
     }
     
-    // Save new user
+    // Create new user object
     const userData = {
         username,
         password,
@@ -80,7 +87,7 @@ function handleRegistration(event) {
     };
     
     console.log('Saving user data:', userData);
-    saveUser(username, userData);
+    saveUser(username, userData); // Save new user to storage
     
     // Verify user was saved
     const savedUser = getUser(username);
@@ -88,7 +95,7 @@ function handleRegistration(event) {
     
     if (savedUser) {
         alert('Registration successful! Please login.');
-        toggleForms();
+        toggleForms(); // Switch to login form
     } else {
         alert('Registration failed. Please try again.');
     }
@@ -96,7 +103,7 @@ function handleRegistration(event) {
     return false;
 }
 
-// Check if user is logged in
+// Check if user is logged in and redirect if not
 function checkAuth() {
     const currentUser = getCurrentUser();
     console.log('Checking auth for user:', currentUser);
@@ -110,6 +117,7 @@ function checkAuth() {
         return;
     }
     
+    // Retrieve user object for current user
     const user = getUser(currentUser);
     console.log('Retrieved user for auth check:', user);
     
@@ -123,7 +131,7 @@ function checkAuth() {
     return user;
 }
 
-// Handle logout
+// Handle logout: clear session and redirect to login
 function handleLogout() {
     console.log('Logging out user:', getCurrentUser());
     clearCurrentUser();

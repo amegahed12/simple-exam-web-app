@@ -1,9 +1,9 @@
-// Storage keys
+// Storage keys used for localStorage
 const STORAGE_KEYS = {
-    USERS: 'exam_app_users',
-    QUESTIONS: 'exam_app_questions',
-    ATTEMPTS: 'exam_app_attempts',
-    CURRENT_USER: 'exam_app_current_user'
+    USERS: 'exam_app_users', // Key for storing user data
+    QUESTIONS: 'exam_app_questions', // Key for storing questions
+    ATTEMPTS: 'exam_app_attempts', // Key for storing exam attempts
+    CURRENT_USER: 'exam_app_current_user' // Key for storing the current logged-in user
 };
 
 // Initialize storage with default data if empty
@@ -55,13 +55,16 @@ function initializeStorage() {
     console.log('Storage initialization complete');
 }
 
-// User management
+// User management functions
+
+// Retrieve all users from storage
 function getUsers() {
     const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '{}');
     console.log('Retrieved users:', users);
     return users;
 }
 
+// Save or update a user in storage
 function saveUser(username, userData) {
     console.log('Saving user:', username, userData);
     const users = getUsers();
@@ -76,6 +79,7 @@ function saveUser(username, userData) {
     }
 }
 
+// Retrieve a single user by username
 function getUser(username) {
     const users = getUsers();
     const user = users[username];
@@ -83,15 +87,19 @@ function getUser(username) {
     return user;
 }
 
-// Question management
+// Question management functions
+
+// Retrieve all questions from storage
 function getQuestions() {
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.QUESTIONS) || '[]');
 }
 
+// Save the entire questions array to storage
 function saveQuestions(questions) {
     localStorage.setItem(STORAGE_KEYS.QUESTIONS, JSON.stringify(questions));
 }
 
+// Add a new question to storage
 function addQuestion(question) {
     const questions = getQuestions();
     question.id = questions.length + 1;
@@ -99,6 +107,7 @@ function addQuestion(question) {
     saveQuestions(questions);
 }
 
+// Update an existing question by ID
 function updateQuestion(questionId, updatedQuestion) {
     const questions = getQuestions();
     const index = questions.findIndex(q => q.id === questionId);
@@ -108,40 +117,49 @@ function updateQuestion(questionId, updatedQuestion) {
     }
 }
 
+// Delete a question by ID
 function deleteQuestion(questionId) {
     const questions = getQuestions();
     const filteredQuestions = questions.filter(q => q.id !== questionId);
     saveQuestions(filteredQuestions);
 }
 
-// Attempt management
+// Attempt management functions
+
+// Retrieve all exam attempts from storage
 function getAttempts() {
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTEMPTS) || '[]');
 }
 
+// Save a new exam attempt to storage
 function saveAttempt(attempt) {
     const attempts = getAttempts();
     attempts.push(attempt);
     localStorage.setItem(STORAGE_KEYS.ATTEMPTS, JSON.stringify(attempts));
 }
 
+// Retrieve all attempts for a specific user
 function getUserAttempts(username) {
     const attempts = getAttempts();
     return attempts.filter(attempt => attempt.username === username);
 }
 
-// Current user management
+// Current user management functions
+
+// Set the current logged-in user
 function setCurrentUser(username) {
     console.log('Setting current user to:', username);
     localStorage.setItem(STORAGE_KEYS.CURRENT_USER, username);
 }
 
+// Get the current logged-in user
 function getCurrentUser() {
     const currentUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
     console.log('Getting current user:', currentUser);
     return currentUser;
 }
 
+// Clear the current user from storage (logout)
 function clearCurrentUser() {
     console.log('Clearing current user');
     localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);

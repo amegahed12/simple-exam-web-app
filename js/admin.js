@@ -1,23 +1,21 @@
-// Current state
+// Track the ID of the question currently being edited (null if adding a new question)
 let editingQuestionId = null;
 
-// Initialize admin dashboard
+// Initialize admin dashboard and check admin authentication
 function initializeAdmin() {
     // Check if user is admin
     const user = checkAuth();
     if (!user || !user.isAdmin) {
-        window.location.href = 'index.html';
+        window.location.href = 'index.html'; // Redirect if not admin
         return;
     }
 
-    // Load exam settings
+    // Load exam settings, questions, and user results
     loadExamSettings();
-    // Load and display questions
     renderQuestions();
-    // Load and display user results
     renderUserResults();
 
-    // Add click outside listener for modal
+    // Allow closing the modal by clicking outside its content
     document.getElementById('questionModal').addEventListener('click', function(event) {
         if (event.target === this) {
             closeQuestionModal();
@@ -25,12 +23,13 @@ function initializeAdmin() {
     });
 }
 
-// Exam settings management
+// Load exam duration from localStorage and set it in the input field
 function loadExamSettings() {
     const duration = localStorage.getItem('exam_duration') || 60;
     document.getElementById('examDuration').value = duration;
 }
 
+// Save exam duration to localStorage after validation
 function saveExamSettings() {
     const duration = parseInt(document.getElementById('examDuration').value);
     if (duration < 1) {
@@ -41,7 +40,7 @@ function saveExamSettings() {
     alert('Exam settings saved successfully!');
 }
 
-// Question management
+// Render all questions in the admin dashboard
 function renderQuestions() {
     const questions = getQuestions();
     const container = document.getElementById('questionList');
@@ -64,6 +63,7 @@ function renderQuestions() {
     });
 }
 
+// Show the modal form for adding a new question
 function showAddQuestionForm() {
     editingQuestionId = null;
     document.getElementById('modalTitle').textContent = 'Add New Question';
@@ -72,6 +72,7 @@ function showAddQuestionForm() {
     document.getElementById('questionModal').classList.remove('hidden');
 }
 
+// Show the modal form for editing an existing question
 function editQuestion(questionId) {
     const questions = getQuestions();
     const question = questions.find(q => q.id === questionId);
@@ -100,6 +101,7 @@ function editQuestion(questionId) {
     document.getElementById('questionModal').classList.remove('hidden');
 }
 
+// Dynamically update the question form fields based on the selected type
 function updateQuestionForm() {
     const type = document.getElementById('questionType').value;
     const optionsContainer = document.getElementById('optionsContainer');
@@ -107,7 +109,7 @@ function updateQuestionForm() {
     optionsContainer.innerHTML = '';
     
     if (type === 'mcq') {
-        // Add options inputs
+        // Add inputs for MCQ options
         for (let i = 0; i < 4; i++) {
             const div = document.createElement('div');
             div.className = 'form-group';
@@ -117,7 +119,7 @@ function updateQuestionForm() {
             `;
             optionsContainer.appendChild(div);
         }
-        // Add correct answer input
+        // Add input for correct answer
         const correctAnswerDiv = document.createElement('div');
         correctAnswerDiv.className = 'form-group';
         correctAnswerDiv.innerHTML = `
@@ -126,6 +128,7 @@ function updateQuestionForm() {
         `;
         optionsContainer.appendChild(correctAnswerDiv);
     } else if (type === 'true_false') {
+        // Add radio buttons for True/False
         const div = document.createElement('div');
         div.className = 'form-group';
         div.innerHTML = `
@@ -144,9 +147,11 @@ function updateQuestionForm() {
     // For written questions, no additional inputs are needed
 }
 
+// Handle submission of the question form (add or edit)
 function handleQuestionSubmit(event) {
     event.preventDefault();
     
+    // Get form values
     const type = document.getElementById('questionType').value;
     const questionText = document.getElementById('questionText').value;
     let options = [];
@@ -178,6 +183,7 @@ function handleQuestionSubmit(event) {
         correctAnswer = null;
     }
     
+    // Build question object
     const question = {
         type,
         question: questionText,
@@ -185,6 +191,7 @@ function handleQuestionSubmit(event) {
         correctAnswer
     };
     
+    // Update or add question
     if (editingQuestionId) {
         updateQuestion(editingQuestionId, question);
     } else {
@@ -196,6 +203,7 @@ function handleQuestionSubmit(event) {
     return false;
 }
 
+// Close the question modal and reset the form
 function closeQuestionModal() {
     const modal = document.getElementById('questionModal');
     modal.classList.add('hidden');
@@ -204,7 +212,7 @@ function closeQuestionModal() {
     document.getElementById('questionForm').reset();
 }
 
-// User results management
+// Render user results and exam attempts in the admin dashboard
 function renderUserResults() {
     const attempts = getAttempts();
     const users = getUsers();
@@ -265,6 +273,7 @@ function renderUserResults() {
     });
 }
 
+// Show detailed information about a specific exam attempt
 function viewAttempt(username, timestamp) {
     const attempts = getAttempts();
     const attempt = attempts.find(a => a.username === username && a.timestamp === timestamp);
@@ -295,6 +304,7 @@ Detailed Answers:
     alert(details);
 }
 
+// Delete a question after confirmation and refresh the list
 function deleteQuestion(questionId) {
     if (confirm('Are you sure you want to delete this question?')) {
         const questions = getQuestions();

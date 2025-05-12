@@ -1,18 +1,18 @@
-// Exam state
-let currentQuestionIndex = 0;
-let questions = [];
-let userAnswers = {};
-let markedQuestions = new Set();
-let examTimer = null;
-let timeRemaining = 0;
+// Exam state variables to track progress, answers, and timing
+let currentQuestionIndex = 0; // Index of the current question being displayed
+let questions = []; // Array to hold all exam questions
+let userAnswers = {}; // Object to store user's answers by question ID
+let markedQuestions = new Set(); // Set to track questions marked for review
+let examTimer = null; // Reference to the timer interval
+let timeRemaining = 0; // Time left in seconds
 
-// Initialize exam
+// Initialize the exam when the page loads
 function initializeExam() {
-    // Check authentication
+    // Check if the user is authenticated
     const user = checkAuth();
     if (!user) return;
 
-    // Load questions
+    // Load questions from storage
     questions = getQuestions();
     if (questions.length === 0) {
         alert('No questions available');
@@ -20,30 +20,31 @@ function initializeExam() {
         return;
     }
 
-    // Initialize user answers
+    // Initialize userAnswers with null for each question
     questions.forEach(q => {
         userAnswers[q.id] = null;
     });
 
-    // Set exam duration from settings
+    // Set exam duration from settings (default to 60 minutes if not set)
     const duration = parseInt(localStorage.getItem('exam_duration')) || 60;
     timeRemaining = duration * 60; // Convert minutes to seconds
 
-    // Start timer
+    // Start the countdown timer
     startTimer();
 
-    // Render first question
+    // Render the first question and navigation panel
     renderQuestion();
     renderNavigation();
 }
 
-// Timer functions
+// Start the countdown timer and handle time expiration
 function startTimer() {
     updateTimerDisplay();
     examTimer = setInterval(() => {
         timeRemaining--;
         updateTimerDisplay();
         
+        // If time runs out, submit the exam automatically
         if (timeRemaining <= 0) {
             clearInterval(examTimer);
             submitExam();
@@ -51,6 +52,7 @@ function startTimer() {
     }, 1000);
 }
 
+// Update the timer display in the UI
 function updateTimerDisplay() {
     const minutes = Math.floor(timeRemaining / 60);
     const seconds = timeRemaining % 60;
@@ -58,7 +60,7 @@ function updateTimerDisplay() {
         `Time Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-// Question rendering
+// Render the current question and its options/answer area
 function renderQuestion() {
     const question = questions[currentQuestionIndex];
     const container = document.getElementById('questionContainer');
@@ -69,6 +71,7 @@ function renderQuestion() {
         </div>
     `;
 
+    // Render MCQ or True/False options as radio buttons
     if (question.type === 'mcq' || question.type === 'true_false') {
         html += '<ul class="options-list">';
         question.options.forEach((option, index) => {
@@ -87,6 +90,7 @@ function renderQuestion() {
         });
         html += '</ul>';
     } else if (question.type === 'written') {
+        // Render a textarea for written answers
         html += `
             <div class="written-answer">
                 <textarea 
@@ -99,11 +103,12 @@ function renderQuestion() {
         `;
     }
 
+    // Insert the generated HTML into the container
     container.innerHTML = html;
     updateNavigationButtons();
 }
 
-// Navigation
+// Render navigation buttons for each question and update their states
 function renderNavigation() {
     const navContainer = document.getElementById('questionNav');
     navContainer.innerHTML = '';
@@ -113,51 +118,60 @@ function renderNavigation() {
         button.className = 'nav-button';
         button.textContent = index + 1;
         
+        // Highlight the current question
         if (index === currentQuestionIndex) {
             button.classList.add('current');
         }
+        // Mark answered questions
         if (userAnswers[questions[index].id] !== null) {
             button.classList.add('answered');
         }
+        // Mark questions flagged for review
         if (markedQuestions.has(index)) {
             button.classList.add('marked');
         }
 
+        // Set up navigation to the selected question
         button.onclick = () => goToQuestion(index);
         navContainer.appendChild(button);
     });
 }
 
+// Enable/disable navigation buttons based on current position
 function updateNavigationButtons() {
     document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
     document.getElementById('nextBtn').disabled = currentQuestionIndex === questions.length - 1;
 }
 
+// Go to a specific question by index
 function goToQuestion(index) {
     currentQuestionIndex = index;
     renderQuestion();
     renderNavigation();
 }
 
+// Go to the next question if not at the end
 function nextQuestion() {
     if (currentQuestionIndex < questions.length - 1) {
         goToQuestion(currentQuestionIndex + 1);
     }
 }
 
+// Go to the previous question if not at the beginning
 function previousQuestion() {
     if (currentQuestionIndex > 0) {
         goToQuestion(currentQuestionIndex - 1);
     }
 }
 
-// Answer handling
+// Save the user's answer for the current question
 function saveAnswer(answer) {
     const question = questions[currentQuestionIndex];
     userAnswers[question.id] = answer;
     renderNavigation();
 }
 
+// Mark or unmark the current question for review
 function markQuestion() {
     if (markedQuestions.has(currentQuestionIndex)) {
         markedQuestions.delete(currentQuestionIndex);
@@ -167,21 +181,22 @@ function markQuestion() {
     renderNavigation();
 }
 
-// Exam submission
+// Submit the exam, calculate the score, and show results
 function submitExam() {
+    // Confirm submission with the user
     if (!confirm('Are you sure you want to submit the exam?')) {
         return;
     }
 
-    clearInterval(examTimer);
+    clearInterval(examTimer); // Stop the timer
     
-    const currentUser = getCurrentUser();
-    const questions = getQuestions();
+    const currentUser = getCurrentUser(); // Get the current user's username
+    const questions = getQuestions(); // Reload questions from storage
     let score = 0;
     let totalQuestions = questions.length;
     let answeredQuestions = 0;
 
-    // Calculate score
+    // Calculate the user's score and answered questions
     questions.forEach(question => {
         const userAnswer = userAnswers[question.id];
         if (userAnswer !== null) {
@@ -192,20 +207,21 @@ function submitExam() {
         }
     });
 
+    // Create an attempt object to store the exam results
     const attempt = {
         username: currentUser,
         timestamp: new Date().toISOString(),
         answers: userAnswers,
-        timeSpent: (60 * 60 - timeRemaining) / 60, // Convert to minutes
+        timeSpent: (60 * 60 - timeRemaining) / 60, // Time spent in minutes
         markedQuestions: Array.from(markedQuestions),
         score: score,
         totalQuestions: totalQuestions,
         answeredQuestions: answeredQuestions
     };
 
-    saveAttempt(attempt);
+    saveAttempt(attempt); // Save the attempt to storage
     
-    // Show results to user
+    // Prepare and show the results message
     const scorePercentage = (score / totalQuestions * 100).toFixed(1);
     const message = `
 Exam submitted successfully!
@@ -216,9 +232,9 @@ Your Results:
 - Time Spent: ${Math.floor(attempt.timeSpent)} minutes
     `;
     
-    alert(message);
-    handleLogout();
+    alert(message); // Show the results to the user
+    handleLogout(); // Log the user out after submission
 }
 
-// Initialize exam when page loads
+// Set up the exam when the page finishes loading
 document.addEventListener('DOMContentLoaded', initializeExam);
